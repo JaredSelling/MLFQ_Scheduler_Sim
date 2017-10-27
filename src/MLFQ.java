@@ -17,6 +17,8 @@ public class MLFQ {
 
         int curTime = 0;
 
+        boolean preemptFlag = false;
+
         //add processes to ready queue
         readyQueue.enqueue(P1);
         readyQueue.enqueue(P2);
@@ -30,40 +32,36 @@ public class MLFQ {
         //get first process
         Process curProc = readyQueue.dequeue();
 
+        //output status info
+        System.out.println("Current Time:   " + curTime);
+        System.out.println("Now running:    " + curProc.getId());
+        System.out.println("Current burst: " + curProc.getCurrentBurst());
+        System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
+        System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
+        System.out.println("------------------------------------");
+        System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex    CurIOIndex");
+        for(int i = 0; i<readyQueue.size(); i++) {
+            System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() +
+                    "        " + readyQueue.getItem(i).getArrivalTime() + "            " + readyQueue.getItem(i).getCurrentBurstIndex() +
+                    "/" + readyQueue.getItem(i).getBurstTimesSize() + "              " + readyQueue.getItem(i).getCurrentIOIndex() + "/" + readyQueue.getItem(i).getIOTimesSize());
+        }
+        System.out.println("------------------------------------");
+        System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex    curBurstIndex" );
+        for(int j = 0; j<blockingQueue.size(); j++) {
+            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() +
+                    "                     " + blockingQueue.getItem(j).getCurrentIOIndex() + "/" + blockingQueue.getItem(j).getIOTimesSize() +
+                    "          " + blockingQueue.getItem(j).getCurrentBurstIndex() + "/" + blockingQueue.getItem(j).getBurstTimesSize()
+            );
 
+        }
+        System.out.println("------------------------------------");
+        System.out.println("------------------------------------");
 
 
         //Main loop
-        while(readyQueue.hasProcesses() || blockingQueue.hasProcesses()) {
+        while((readyQueue.hasProcesses() || blockingQueue.hasProcesses()) && curTime<5) {
 
-            //loop through all priority queues > curProc.priority
-
-            //if there exists a process with priority > curProc.priority and arrival time < curTime
-
-            //preemptProc = process with earliest arrival time < curTime
-
-            //save curProc's state (PCB)
-
-            //curProc = preemptProc
-
-
-            //check for preempting processes
-            Queue<Process> preemptCandidates = new Queue<Process>();
-
-            //loop through ready queue and find all candidates for preemption
-            for(int i = 0; i<readyQueue.size(); i++) {
-                if(readyQueue.getItem(i).getPriority() > curProc.getPriority() && readyQueue.getItem(i).getArrivalTime() <= curTime) {
-                    preemptCandidates.enqueue(readyQueue.getItem(i));
-                }
-            }
-            //sort preemptCandidates queue by arrival time, earliest will preempt
-            preemptCandidates.sort();
-            //place current process back in ready queue
-            readyQueue.enqueue(curProc);
-            //preemption
-            curProc = preemptCandidates.dequeue();
-
-
+            curTime++;
 
             //decrement ioBurst of every process in blocking queue
             if(blockingQueue.hasProcesses()) {
@@ -102,6 +100,28 @@ public class MLFQ {
             }
 
 
+            //check for preempting processes
+            Queue<Process> preemptCandidates = new Queue<Process>();
+
+            //loop through ready queue and find all candidates for preemption
+            for(int i = 0; i<readyQueue.size(); i++) {
+                if(readyQueue.getItem(i).getPriority() > curProc.getPriority() && readyQueue.getItem(i).getArrivalTime() <= curTime) {
+                    preemptCandidates.enqueue(readyQueue.getItem(i));
+                    preemptFlag = true;
+                }
+            }
+            if(preemptFlag) {
+                //sort preemptCandidates queue by arrival time, earliest will preempt
+                preemptCandidates.sort();
+                //place current process back in ready queue
+                readyQueue.enqueue(curProc);
+                //preemption
+                curProc = preemptCandidates.dequeue();
+            }
+
+
+
+
             //do RR scheduling with tq = 6 if current process is a priority1
             //do RR scheduling with tq = 12 if current process is a priority2
             if(curProc.getPriority() == 1 || curProc.getPriority() == 2) {
@@ -115,6 +135,7 @@ public class MLFQ {
                 if(curProc.getCurrentBurst() == 0 && curProc.getTimeQuantum() > 0) {
                     //add process to blocking queue
                     blockingQueue.enqueue(curProc);
+                    curProc = readyQueue.dequeue();
                 }
                 //handle process that gets preempted for time quantum
                 if(curProc.getCurrentBurst() > 0 && curProc.getTimeQuantum() == 0) {
@@ -131,7 +152,7 @@ public class MLFQ {
                 }
             }
             else if(curProc.getPriority() == 3) {
-                //TODO IMPLEMENT ME
+                //TODO IMPLEMENT FCFS
             }
 
 
@@ -156,6 +177,30 @@ public class MLFQ {
             //process's new arrival time = curTime
 
 
+            //output status info
+            System.out.println("Current Time:   " + curTime);
+            System.out.println("Now running:    " + curProc.getId());
+            System.out.println("Current burst: " + curProc.getCurrentBurst());
+            System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
+            System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
+            System.out.println("------------------------------------");
+            System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex    CurIOIndex");
+            for(int i = 0; i<readyQueue.size(); i++) {
+                System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() +
+                        "        " + readyQueue.getItem(i).getArrivalTime() + "            " + readyQueue.getItem(i).getCurrentBurstIndex() +
+                        "/" + readyQueue.getItem(i).getBurstTimesSize() + "              " + readyQueue.getItem(i).getCurrentIOIndex() + "/" + readyQueue.getItem(i).getIOTimesSize());
+            }
+            System.out.println("------------------------------------");
+            System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex    curBurstIndex" );
+            for(int j = 0; j<blockingQueue.size(); j++) {
+                System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() +
+                        "                     " + blockingQueue.getItem(j).getCurrentIOIndex() + "/" + blockingQueue.getItem(j).getIOTimesSize() +
+                        "          " + blockingQueue.getItem(j).getCurrentBurstIndex() + "/" + blockingQueue.getItem(j).getBurstTimesSize()
+                );
+
+            }
+            System.out.println("------------------------------------");
+            System.out.println("------------------------------------");
         }
 
     }
