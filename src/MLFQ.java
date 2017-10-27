@@ -10,7 +10,11 @@ public class MLFQ {
         Process P7 = new Process("P7", new int[]{4, 7, 6, 5, 4, 7, 6, 5, 6, 9}, new int[]{36, 31, 32, 41, 42, 39, 33, 34, 21}, 0);
         Process P8 = new Process("P8", new int[]{5, 4, 6, 4, 6, 5, 4, 6, 6}, new int[]{14, 33, 31, 31, 37, 21, 19, 11}, 0);
 
-        ReadyQueue<Process> readyQueue = new ReadyQueue<Process>();
+        Queue<Process> readyQueue = new Queue<Process>();
+        Queue<Process> blockingQueue = new Queue<>();
+
+        int curTime = 0;
+        int timeQuantumCounter = 0;
 
         //add processes to ready queue
         readyQueue.enqueue(P1);
@@ -24,6 +28,7 @@ public class MLFQ {
 
 
         //Main loop
+        while(readyQueue.hasProcesses() || blockingQueue.hasProcesses()) {
 
             //curTime = current time
 
@@ -38,67 +43,63 @@ public class MLFQ {
             //curIOTimeIndex = index of the current IO (within IOtimes array) for a process
 
 
-
-
             //loop through all priority queues > curProc.priority
 
-                //if there exists a process with priority > curProc.priority and arrival time < curTime
+            //if there exists a process with priority > curProc.priority and arrival time < curTime
 
-                    //preemptProc = process with earliest arrival time < curTime
+            //preemptProc = process with earliest arrival time < curTime
 
-                    //save curProc's state (PCB)
+            //save curProc's state (PCB)
 
-                    //curProc = preemptProc
+            //curProc = preemptProc
 
 
             //if curProc.priority == 1 or curProc.priority == 2 do RR scheduling
 
-                //if curBurst > 0
+            //if curBurst > 0
 
-                    //if timeQuantumCounter < curProc's time quantum
+            //if timeQuantumCounter < curProc's time quantum
 
-                        //decrement curBurst
+            //decrement curBurst
 
-                        //increment timeQuantumCounter
+            //increment timeQuantumCounter
 
-                    //if timeQuantumCounter == curProc's time quantum and curBurst != 0
+            //if timeQuantumCounter == curProc's time quantum and curBurst != 0
 
-                        //decrease curProc's priority queue
+            //decrease curProc's priority queue
 
-                        //curProc's new arrival time = curTime
+            //curProc's new arrival time = curTime
 
-                        //save curProc's state
+            //save curProc's state
 
-                        //curProcess = next process in priority queue
+            //curProcess = next process in priority queue
 
-                        //reset timeQuantumCounter
+            //reset timeQuantumCounter
 
-                //if curBurst = 0
+            //if curBurst = 0
 
-                    //reset timeQuantumCounter
+            //reset timeQuantumCounter
 
-                    //add curProc to BLOCKING queue and go out to IO
+            //add curProc to BLOCKING queue and go out to IO
 
-                    //curProc = next process in priority queue = curProc.priority
-
-
-                //if curProc.priority == 3 do FCFS scheduling
+            //curProc = next process in priority queue = curProc.priority
 
 
+            //if curProc.priority == 3 do FCFS scheduling
 
 
             //loop through BLOCKING queue
 
-                //decrement I/O time of every process
+            //decrement I/O time of every process
 
-                //if a process's curIO == 0
+            //if a process's curIO == 0
 
-                    //increment curIOTimeIndex for that process
+            //increment curIOTimeIndex for that process
 
-                    //process's new arrival time = curTime
+            //process's new arrival time = curTime
 
 
-
+        }
 
     }
 }
