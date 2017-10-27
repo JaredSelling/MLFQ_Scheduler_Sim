@@ -12,6 +12,7 @@ public class MLFQ {
 
         Queue<Process> readyQueue = new Queue<Process>();
         Queue<Process> blockingQueue = new Queue<>();
+        Queue<Process> completeQueue = new Queue<>();
 
         int curTime = 0;
 
@@ -27,6 +28,8 @@ public class MLFQ {
 
         //get first process
         Process curProc = readyQueue.dequeue();
+
+
 
 
         //Main loop
@@ -56,6 +59,50 @@ public class MLFQ {
             //curProc = preemptProc
 
 
+
+            //decrement ioBurst of every process in blocking queue
+            if(blockingQueue.hasProcesses()) {
+
+                //new queue to hold items to remove from the blocking queue
+                Queue<Process> toRemove = new Queue<>();
+
+                for(int x = 0; x<blockingQueue.size(); x++) {
+
+                    //decrement current io burst if it is greater than 0
+                    if(blockingQueue.getItem(x).getCurrentIO() > 0) {
+                        blockingQueue.getItem(x).decrementCurrentIO();
+                    }
+
+                    //increment io index and mark process to be removed from blocking queue if its io burst = 0
+                    if(blockingQueue.getItem(x).getCurrentIO() <= 0) {
+                        blockingQueue.getItem(x).incrementCurrentIOIndex();
+                        toRemove.enqueue(blockingQueue.getItem(x));
+                        //if process has completed all cpu and i/o bursts, it is complete
+                        if(blockingQueue.getItem(x).isComplete()) {
+                            blockingQueue.getItem(x).setTurnaroundTime(curTime);
+                            blockingQueue.getItem(x).setWaitingTime(blockingQueue.getItem(x).getTurnaroundTime() - blockingQueue.getItem(x).getTotalBurstTime());
+                            completeQueue.enqueue(blockingQueue.getItem(x));
+                            System.out.println(blockingQueue.getItem(x).getId() + " HAS COMPLETED");
+                        } else {
+                            blockingQueue.getItem(x).setState("READY");
+                            blockingQueue.getItem(x).setArrivalTime(curTime);
+                            readyQueue.enqueue(blockingQueue.getItem(x));
+                            if(curProc == null) {
+                                curProc = readyQueue.dequeue();
+                                curProc.setResponseTime(curTime);
+                            }
+                        }
+
+                    }
+                }
+
+                //remove from the blocking queue all processes that are in toRemove
+                for(int y=0; y<toRemove.size(); y++) {
+                    blockingQueue.remove(toRemove.getItem(y));
+                }
+            }
+
+
             //do RR scheduling with tq = 12 if current process is a priority1
             //do RR scheduling with tq = 12 if current process is a priority2
             if(curProc.getPriority() == 1 || curProc.getPriority() == 2) {
@@ -80,6 +127,8 @@ public class MLFQ {
                     curProc.setArrivalTime(curTime);
                     //add process back into ready queue
                     readyQueue.enqueue(curProc);
+                    //get next process
+                    curProc = readyQueue.dequeue();
                 }
             }
 
