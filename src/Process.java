@@ -14,6 +14,7 @@ public class Process implements Comparable<Process> {
     private String state;
     private int totalBurstTime;
     private int priority;
+    private int timeQuantum;
 
     //Constructor
 
@@ -26,6 +27,7 @@ public class Process implements Comparable<Process> {
         this.currentIOIndex = 0;
         this.state="READY";
         this.priority = 1;
+        this.timeQuantum = 6;
 
         this.totalBurstTime = calculateTotalBurstTime();
     }
@@ -99,6 +101,10 @@ public class Process implements Comparable<Process> {
 
     public int getPriority() {
         return priority;
+    }
+
+    public int getTimeQuantum() {
+        return timeQuantum;
     }
 
     //Setters
@@ -191,6 +197,29 @@ public class Process implements Comparable<Process> {
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public void decrementTimeQuantum() {
+            timeQuantum--;
+    }
+
+    public void setTimeQuantum() {
+        switch(priority) {
+            case 1:
+                timeQuantum = 6;
+                break;
+            case 2:
+                timeQuantum = 12;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void decreasePriority() {
+        if(this.priority != 3) {
+            this.priority++;
+        }
     }
 
     @Override

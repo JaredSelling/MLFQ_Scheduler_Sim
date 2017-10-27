@@ -14,7 +14,6 @@ public class MLFQ {
         Queue<Process> blockingQueue = new Queue<>();
 
         int curTime = 0;
-        int timeQuantumCounter = 0;
 
         //add processes to ready queue
         readyQueue.enqueue(P1);
@@ -25,6 +24,9 @@ public class MLFQ {
         readyQueue.enqueue(P6);
         readyQueue.enqueue(P7);
         readyQueue.enqueue(P8);
+
+        //get first process
+        Process curProc = readyQueue.dequeue();
 
 
         //Main loop
@@ -54,31 +56,35 @@ public class MLFQ {
             //curProc = preemptProc
 
 
-            //if curProc.priority == 1 or curProc.priority == 2 do RR scheduling
+            //do RR scheduling with tq = 12 if current process is a priority1
+            //do RR scheduling with tq = 12 if current process is a priority2
+            if(curProc.getPriority() == 1 || curProc.getPriority() == 2) {
+                if(curProc.getCurrentBurst() > 0 && curProc.getTimeQuantum() > 0) {
+                    //decrement the current burst
+                    curProc.decrementCurrentBurst();
+                    //decrement remaining time quantum
+                    curProc.decrementTimeQuantum();
+                }
+                //handle process that completes its current burst
+                if(curProc.getCurrentBurst() == 0 && curProc.getTimeQuantum() > 0) {
+                    //add process to blocking queue
+                    blockingQueue.enqueue(curProc);
+                }
+                //handle process that gets preempted for time quantum
+                if(curProc.getCurrentBurst() > 0 && curProc.getTimeQuantum() == 0) {
+                    //decrease priority
+                    curProc.decreasePriority();
+                    //update time quantum to match lowered priority
+                    curProc.setTimeQuantum();
+                    //update arrival time
+                    curProc.setArrivalTime(curTime);
+                    //add process back into ready queue
+                    readyQueue.enqueue(curProc);
+                }
+            }
 
-            //if curBurst > 0
 
-            //if timeQuantumCounter < curProc's time quantum
 
-            //decrement curBurst
-
-            //increment timeQuantumCounter
-
-            //if timeQuantumCounter == curProc's time quantum and curBurst != 0
-
-            //decrease curProc's priority queue
-
-            //curProc's new arrival time = curTime
-
-            //save curProc's state
-
-            //curProcess = next process in priority queue
-
-            //reset timeQuantumCounter
-
-            //if curBurst = 0
-
-            //reset timeQuantumCounter
 
             //add curProc to BLOCKING queue and go out to IO
 
