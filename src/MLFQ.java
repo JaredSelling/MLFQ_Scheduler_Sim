@@ -35,19 +35,6 @@ public class MLFQ {
         //Main loop
         while(readyQueue.hasProcesses() || blockingQueue.hasProcesses()) {
 
-            //curTime = current time
-
-            //timeQuantumCounter = 0
-
-            //curProc = currently executing process
-
-            //curBurst = currently executing process's current cpu burst
-
-            //curIO = currentIO time of a process
-
-            //curIOTimeIndex = index of the current IO (within IOtimes array) for a process
-
-
             //loop through all priority queues > curProc.priority
 
             //if there exists a process with priority > curProc.priority and arrival time < curTime
@@ -59,20 +46,20 @@ public class MLFQ {
             //curProc = preemptProc
 
 
+            //check for preempting processes
+
+
+
 
             //decrement ioBurst of every process in blocking queue
             if(blockingQueue.hasProcesses()) {
-
                 //new queue to hold items to remove from the blocking queue
                 Queue<Process> toRemove = new Queue<>();
-
                 for(int x = 0; x<blockingQueue.size(); x++) {
-
                     //decrement current io burst if it is greater than 0
                     if(blockingQueue.getItem(x).getCurrentIO() > 0) {
                         blockingQueue.getItem(x).decrementCurrentIO();
                     }
-
                     //increment io index and mark process to be removed from blocking queue if its io burst = 0
                     if(blockingQueue.getItem(x).getCurrentIO() <= 0) {
                         blockingQueue.getItem(x).incrementCurrentIOIndex();
@@ -92,10 +79,8 @@ public class MLFQ {
                                 curProc.setResponseTime(curTime);
                             }
                         }
-
                     }
                 }
-
                 //remove from the blocking queue all processes that are in toRemove
                 for(int y=0; y<toRemove.size(); y++) {
                     blockingQueue.remove(toRemove.getItem(y));
@@ -103,7 +88,7 @@ public class MLFQ {
             }
 
 
-            //do RR scheduling with tq = 12 if current process is a priority1
+            //do RR scheduling with tq = 6 if current process is a priority1
             //do RR scheduling with tq = 12 if current process is a priority2
             if(curProc.getPriority() == 1 || curProc.getPriority() == 2) {
                 if(curProc.getCurrentBurst() > 0 && curProc.getTimeQuantum() > 0) {
@@ -130,6 +115,9 @@ public class MLFQ {
                     //get next process
                     curProc = readyQueue.dequeue();
                 }
+            }
+            else if(curProc.getPriority() == 3) {
+                //TODO IMPLEMENT ME
             }
 
 
