@@ -14,6 +14,7 @@ public class MLFQ {
         Queue<Process> blockingQueue = new Queue<>();
         Queue<Process> completeQueue = new Queue<>();
 
+
         int curTime = 0;
 
         //add processes to ready queue
@@ -47,7 +48,18 @@ public class MLFQ {
 
 
             //check for preempting processes
+            Queue<Process> preemptCandidates = new Queue<Process>();
 
+            //loop through ready queue and find all candidates for preemption
+            for(int i = 0; i<readyQueue.size(); i++) {
+                if(readyQueue.getItem(i).getPriority() > curProc.getPriority() && readyQueue.getItem(i).getArrivalTime() <= curTime) {
+                    preemptCandidates.enqueue(readyQueue.getItem(i));
+                }
+            }
+            //sort preemptCandidates queue by arrival time
+            preemptCandidates.sort();
+            //earliest process will preempt
+            Process preemptProc = preemptCandidates.dequeue();
 
 
 
