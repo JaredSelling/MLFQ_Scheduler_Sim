@@ -56,10 +56,12 @@ public class MLFQ {
                     preemptCandidates.enqueue(readyQueue.getItem(i));
                 }
             }
-            //sort preemptCandidates queue by arrival time
+            //sort preemptCandidates queue by arrival time, earliest will preempt
             preemptCandidates.sort();
-            //earliest process will preempt
-            Process preemptProc = preemptCandidates.dequeue();
+            //place current process back in ready queue
+            readyQueue.enqueue(curProc);
+            //preemption
+            curProc = preemptCandidates.dequeue();
 
 
 
