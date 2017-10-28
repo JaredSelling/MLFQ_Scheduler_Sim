@@ -35,4 +35,10 @@ public class Queue<Process extends Comparable<? super Process>> {
         list.remove(p);
     }
 
+    public void clear() {
+        list.clear();
+    }
+
+
+
 }

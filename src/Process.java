@@ -203,7 +203,7 @@ public class Process implements Comparable<Process> {
             timeQuantum--;
     }
 
-    public void setTimeQuantum() {
+    public void resetTimeQuantum() {
         switch(priority) {
             case 1:
                 timeQuantum = 6;
