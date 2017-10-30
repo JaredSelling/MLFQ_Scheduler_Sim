@@ -15,7 +15,7 @@ public class Process implements Comparable<Process> {
     private int totalBurstTime;
     private int priority;
     private int timeQuantum;
-
+    private boolean hasBlocked;
     //Constructor
 
     public Process(String id, int[] burstTimes, int[] ioTimes, int arrivalTime) {
@@ -34,6 +34,11 @@ public class Process implements Comparable<Process> {
 
 
     //Getters
+
+
+    public boolean hasBlocked() {
+        return hasBlocked;
+    }
 
     public int getArrivalTime() {
         return arrivalTime;
@@ -220,6 +225,10 @@ public class Process implements Comparable<Process> {
         if(this.priority != 3) {
             this.priority++;
         }
+    }
+
+    public void setHasBlocked(boolean hasBlocked) {
+        this.hasBlocked = hasBlocked;
     }
 
     @Override
