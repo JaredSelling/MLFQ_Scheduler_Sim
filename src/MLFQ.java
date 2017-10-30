@@ -65,19 +65,26 @@ public class MLFQ {
                             blockingQueue.getItem(x).setState("READY");
                             blockingQueue.getItem(x).setArrivalTime(curTime);
                             readyQueue.enqueue(blockingQueue.getItem(x));
-                            if (curProc == null) {
-                                curProc = readyQueue.dequeue();
-                                curProc.setResponseTime(curTime);
-                                displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
-                                //prevents a process from being worked on by cpu in the same loop that it was worked on by the blocking queue
-                                continue mainLoop;
-                            }
                         }
                     }
+
                 }
                 //remove from the blocking queue all processes that are in toRemove
                 for (int y = 0; y < toRemove.size(); y++) {
                     blockingQueue.remove(toRemove.getItem(y));
+                }
+
+                if (curProc == null) {
+                    //curProc = readyQueue.dequeue();
+                    if(readyQueue.hasProcesses()) {
+                        curProc = getNextProcess(readyQueue, curProc, curTime);
+                        readyQueue.remove(curProc);
+                        curProc.setResponseTime(curTime);
+                        //TODO resolve issue at time 296-97 where blocking queue doesn't get decremented due to continue statement
+                        displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
+                        //prevents a process from being worked on by cpu in the same loop that it was worked on by the blocking queue
+                        continue mainLoop;
+                    }
                 }
             }
 
