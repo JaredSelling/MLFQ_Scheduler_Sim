@@ -2,7 +2,7 @@ public class MLFQ {
     public static void main(String[] args) {
         //instantiate processes
         Process P1 = new Process("P1", new int[]{4, 5, 6, 7, 6, 4, 5, 4}, new int[]{15, 31, 26, 24, 41, 51, 16}, 0);
-        Process P2 = new Process("P2", new int[]{9, 11, 15, 12, 8, 11, 9, 10, 7}, new int[]{28, 22, 21, 12, 8, 11, 9, 10}, 0);
+        Process P2 = new Process("P2", new int[]{9, 11, 15, 12, 8, 11, 9, 10, 7}, new int[]{28, 22, 21, 28, 34, 34, 29, 31}, 0);
         Process P3 = new Process("P3", new int[]{24, 12, 6, 17, 11, 22, 18}, new int[]{28, 21, 27, 21, 54, 31}, 0);
         Process P4 = new Process("P4", new int[]{15, 14, 16, 18, 14, 13, 16, 15}, new int[]{35, 41, 45, 51, 61, 54, 61}, 0);
         Process P5 = new Process("P5", new int[]{6, 5, 15, 4, 7, 4, 6, 10, 3}, new int[]{22, 21, 31, 26, 31, 18, 21, 33}, 0);
@@ -32,13 +32,14 @@ public class MLFQ {
 
         //get first process
         Process curProc = readyQueue.dequeue();
+        curProc.setResponseTime(curTime);
 
         displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
 
 
         //Main loop
         mainLoop:
-        while ((readyQueue.hasProcesses() || blockingQueue.hasProcesses()) && curTime < 500) {
+        while ((readyQueue.hasProcesses() || blockingQueue.hasProcesses()) || curProc != null) {
 
             curTime++;
 
@@ -57,8 +58,9 @@ public class MLFQ {
                         toRemove.enqueue(blockingQueue.getItem(x));
                         //if process has completed all cpu and i/o bursts, it is complete
                         if (blockingQueue.getItem(x).isComplete()) {
-                            blockingQueue.getItem(x).setTurnaroundTime(curTime);
+                            blockingQueue.getItem(x).setTurnaroundTime(curTime-1);
                             blockingQueue.getItem(x).setWaitingTime(blockingQueue.getItem(x).getTurnaroundTime() - blockingQueue.getItem(x).getTotalBurstTime());
+                            //set turnaround time for the completed process and add it to complete
                             completeQueue.enqueue(blockingQueue.getItem(x));
                             System.out.println(blockingQueue.getItem(x).getId() + " HAS COMPLETED");
                         } else {
@@ -80,7 +82,6 @@ public class MLFQ {
                         curProc = getNextProcess(readyQueue, curProc, curTime);
                         readyQueue.remove(curProc);
                         curProc.setResponseTime(curTime);
-                        //TODO resolve issue at time 296-97 where blocking queue doesn't get decremented due to continue statement
                         displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                         //prevents a process from being worked on by cpu in the same loop that it was worked on by the blocking queue
                         continue mainLoop;
@@ -117,13 +118,18 @@ public class MLFQ {
                     if (curProc.getCurrentBurst() == 0 && curProc.getTimeQuantum() >= 0) {
                         if (curProc.isComplete()) {
                             readyQueue.remove(curProc);
+                            curProc.setTurnaroundTime(curTime);
+                            curProc.setWaitingTime(curProc.getTurnaroundTime() - curProc.getTotalBurstTime());
+
                             completeQueue.enqueue(curProc);
                             if (readyQueue.hasProcesses()) {
                                 curProc = getNextProcess(readyQueue, curProc, curTime);
                                 readyQueue.remove(curProc);
+                                curProc.setResponseTime(curTime);
+                                displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                             } else {
-                                idleTime++;
                                 curProc = null;
+                                displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                                 continue;
                             }
 
@@ -138,15 +144,13 @@ public class MLFQ {
                             //get next process from ready queue
                             curProc = getNextProcess(readyQueue, curProc, curTime);
                             readyQueue.remove(curProc);
+                            curProc.setResponseTime(curTime);
                             displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                             //curProc = readyQueue.dequeue();
                         }
 
                     }
-/*                //handle process that completes current burst and time quantum simultaneously
-                if(curProc.getCurrentBurst() == 0 && curProc.getTimeQuantum() == 0) {
 
-                }*/
                     //handle process that gets preempted for time quantum
                     if (curProc.getCurrentBurst() > 0 && curProc.getTimeQuantum() == 0 && curProc.getPriority() < 3) {
                         //decrease priority
@@ -157,13 +161,10 @@ public class MLFQ {
                         curProc.setArrivalTime(curTime);
                         //add process back into ready queue
                         readyQueue.enqueue(curProc);
-                        System.out.println("*************************************************");
-                        System.out.println("BEFORE " + curProc.getId() + "IS PREEMPTED FOR TIME QUANTUM");
-                        System.out.println("*************************************************");
-                        displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                         //get next process
                         curProc = getNextProcess(readyQueue, curProc, curTime);
                         readyQueue.remove(curProc);
+                        curProc.setResponseTime(curTime);
                         System.out.println("*************************************************");
                         System.out.println("AFTER PREEMPTION FOR TIME QUANTUM");
                         System.out.println("*************************************************");
@@ -191,8 +192,10 @@ public class MLFQ {
                         displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                     }
                     if (curProc.isComplete()) {
+                        curProc.setTurnaroundTime(curTime);
                         completeQueue.enqueue(curProc);
                         readyQueue.remove(curProc);
+                        curProc.setWaitingTime(curProc.getTurnaroundTime() - curProc.getTotalBurstTime());
                     }
                 }
 
@@ -205,74 +208,37 @@ public class MLFQ {
                     curProc.resetTimeQuantum();
                     //place current process back in ready queue
                     readyQueue.enqueue(curProc);
-                    System.out.println("*************************************************");
-                    System.out.println("BEFORE " + curProc.getId() + " IS PREEMPTED");
-                    System.out.println("*************************************************");
-                    displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
                     //preemption
                     curProc = preemptCandidates.dequeue();
                     readyQueue.remove(curProc);
-                    System.out.println("*************************************************");
-                    System.out.println("AFTER PREEMPTION");
-                    System.out.println("*************************************************");
                     displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
 
                     preemptCandidates.clear();
                     preemptFlag = false;
                 }
 
-
-                displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
             } else {
-                displayInfo(readyQueue, blockingQueue, completeQueue, curProc, curTime);
+                idleTime++;
             }
-            //add curProc to BLOCKING queue and go out to IO
 
-            //curProc = next process in priority queue = curProc.priority
-
-
-            //if curProc.priority == 3 do FCFS scheduling
-
-
-            //loop through BLOCKING queue
-
-            //decrement I/O time of every process
-
-            //if a process's curIO == 0
-
-            //increment curIOTimeIndex for that process
-
-            //process's new arrival time = curTime
-
-
-/*            //output status info
-            System.out.println("Current Time:   " + curTime);
-            System.out.println("Now running:    " + curProc.getId());
-            System.out.println("Priority: " + curProc.getPriority());
-            System.out.println("Current burst: " + curProc.getCurrentBurst());
-            System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
-            System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
-            System.out.println("------------------------------------");
-            System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex    CurIOIndex    Priority");
-            for (int i = 0; i < readyQueue.size(); i++) {
-                System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() +
-                        "        " + readyQueue.getItem(i).getArrivalTime() + "              " + readyQueue.getItem(i).getCurrentBurstIndex() +
-                        "/" + readyQueue.getItem(i).getBurstTimesSize() + "              " + readyQueue.getItem(i).getCurrentIOIndex() + "/" + readyQueue.getItem(i).getIOTimesSize()
-                        + "           " + readyQueue.getItem(i).getPriority()
-                );
-            }
-            System.out.println("------------------------------------");
-            System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex    curBurstIndex    curBurst");
-            for (int j = 0; j < blockingQueue.size(); j++) {
-                System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() +
-                        "                     " + blockingQueue.getItem(j).getCurrentIOIndex() + "/" + blockingQueue.getItem(j).getIOTimesSize() +
-                        "          " + blockingQueue.getItem(j).getCurrentBurstIndex() + "/" + blockingQueue.getItem(j).getBurstTimesSize() + "              " + blockingQueue.getItem(j).getCurrentBurst()
-                );
-
-            }
-            System.out.println("------------------------------------");
-            System.out.println("------------------------------------");*/
         }
+
+        System.out.println("------------------------------------");
+        System.out.println("Current time: " + curTime);
+        System.out.println("Idle time: " + idleTime);
+        double cpuUtil = 100 - (((double)idleTime/(double)curTime) * 100);
+        double rtSum = 0;
+        double wtSum = 0;
+        double ttSum = 0;
+        System.out.println("Cpu Utilization: " + cpuUtil + "%");
+        System.out.println("Complete:    Process    RT    WT    TT");
+        for(int z = 0; z<completeQueue.size(); z++) {
+            System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() + "     " + completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
+            rtSum += completeQueue.getItem(z).getResponseTime();
+            wtSum += completeQueue.getItem(z).getWaitingTime();
+            ttSum += completeQueue.getItem(z).getTurnaroundTime();
+        }
+        System.out.println("Avg:                    " + rtSum/8 + "   " + wtSum/8 + "  " + ttSum/8);
     }
 
     public static Process getNextProcess(Queue<Process> readyQueue, Process curProc, int curTime) {
