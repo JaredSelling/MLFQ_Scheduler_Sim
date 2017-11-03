@@ -233,7 +233,8 @@ public class MLFQ {
         System.out.println("Cpu Utilization: " + cpuUtil + "%");
         System.out.println("Complete:    Process    RT    WT    TT");
         for(int z = 0; z<completeQueue.size(); z++) {
-            System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() + "     " + completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
+            System.out.println("             " + completeQueue.getItem(z).getId() + "         " + completeQueue.getItem(z).getResponseTime() +
+                    "     " + completeQueue.getItem(z).getWaitingTime() + "   " + completeQueue.getItem(z).getTurnaroundTime());
             rtSum += completeQueue.getItem(z).getResponseTime();
             wtSum += completeQueue.getItem(z).getWaitingTime();
             ttSum += completeQueue.getItem(z).getTurnaroundTime();
@@ -285,21 +286,17 @@ public class MLFQ {
             System.out.println("Current burst index: " + curProc.getCurrentBurstIndex() + "/" + curProc.getBurstTimesSize());
             System.out.println("Current io burst index: " + curProc.getCurrentIOIndex() + "/" + curProc.getIOTimesSize());
             System.out.println("------------------------------------");
-            System.out.println("Ready Queue:    Process    Burst    ArrivalTime    CurBurstIndex    CurIOIndex    Priority");
+            System.out.println("Ready Queue:    Process    Burst    Priority");
             for (int i = 0; i < readyQueue.size(); i++) {
-                System.out.println("                " + readyQueue.getItem(i).getId() + "         " + readyQueue.getItem(i).getCurrentBurst() +
-                        "        " + readyQueue.getItem(i).getArrivalTime() + "              " + readyQueue.getItem(i).getCurrentBurstIndex() +
-                        "/" + readyQueue.getItem(i).getBurstTimesSize() + "              " + readyQueue.getItem(i).getCurrentIOIndex() + "/" + readyQueue.getItem(i).getIOTimesSize()
-                        + "           " + readyQueue.getItem(i).getPriority()
+                System.out.println("                " + readyQueue.getItem(i).getId() + "         " +
+                        readyQueue.getItem(i).getCurrentBurst() + "           " + readyQueue.getItem(i).getPriority()
                 );
             }
         }
         System.out.println("------------------------------------");
-        System.out.println("Now in I/O:     Process    Remaining I/O time    curIOIndex    curBurstIndex    curBurst");
+        System.out.println("Now in I/O:     Process    Remaining I/O time");
         for (int j = 0; j < blockingQueue.size(); j++) {
-            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO() +
-                    "                     " + blockingQueue.getItem(j).getCurrentIOIndex() + "/" + blockingQueue.getItem(j).getIOTimesSize() +
-                    "          " + blockingQueue.getItem(j).getCurrentBurstIndex() + "/" + blockingQueue.getItem(j).getBurstTimesSize() + "              " + blockingQueue.getItem(j).getCurrentBurst()
+            System.out.println("                " + blockingQueue.getItem(j).getId() + "         " + blockingQueue.getItem(j).getCurrentIO()
             );
 
         }
